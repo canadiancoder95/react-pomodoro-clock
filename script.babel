@@ -1,0 +1,184 @@
+class PomodoroClock extends React.Component {
+  constructor(props) {
+    super(props)
+  };
+  render() {
+    return (
+      <div>
+        <ClockInterface />
+      </div>
+    );
+  };
+}
+
+class ClockInterface extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      timerTime: 1500,
+      sessionButtonCount: 25,
+      breakButtonCount: 10,
+      myInterval: '',
+      sessionRunning: false,
+      breakOrSession: 'session'
+    }
+    this.startCountDownSession = this.startCountDownSession.bind(this);
+    this.pauseCountDownSession = this.pauseCountDownSession.bind(this);
+    this.resetCountDownSession = this.resetCountDownSession.bind(this);
+    this.sessionTimeUp = this.sessionTimeUp.bind(this);
+    this.sessionTimeDown = this.sessionTimeDown.bind(this);
+    this.breakTimeUp = this.breakTimeUp.bind(this);
+    this.breakTimeDown = this.breakTimeDown.bind(this);
+  }
+
+  timeLeft() {
+    var counter = 0
+    counter += 1
+    this.setState({
+      timerTime: (this.state.timerTime) - counter
+    });
+  }
+  convertTimerToMinutes(m) {
+    var minutes = Math.floor(m / 60)
+    return minutes
+  }  
+  convertTimerToSeconds(s) {
+    var seconds = (s % 60)
+    
+    if (seconds == 0) {
+      return seconds + '0'
+    } else if (seconds < 10) {
+      return '0' + seconds
+    } else {
+      return seconds
+    };
+  }    
+  startCountDownSession() { 
+    if (this.state.breakOrSession == 'session') {
+      this.setState({
+        timerTime: this.state.sessionButtonCount * 60,      
+        sessionRunning: true,
+        myInterval:  accurateInterval(() => {
+          this.timeLeft()
+          if (this.state.timerTime == 0) {
+           this.toggleSession(); 
+          };
+        }, 1000),
+      });      
+     }
+    if (this.state.breakOrSession == 'break') {
+      this.setState({
+        timerTime: this.state.breakButtonCount * 60,      
+        sessionRunning: true,
+        myInterval:  accurateInterval(() => {
+          this.timeLeft()
+          if (this.state.timerTime == 0) {
+           this.toggleBreak(); 
+          }
+        }, 1000),
+      });      
+     }   
+   }
+  toggleSession() {
+      this.setState({
+        breakOrSession: 'break'
+      })
+      this.pauseCountDownSession()
+      this.startCountDownSession()
+      this.signalTimerDone()
+  }
+  toggleBreak() {
+      this.setState({
+        breakOrSession: 'session'
+      })
+      this.pauseCountDownSession()
+      this.signalTimerDone()
+      this.startCountDownSession()    
+  }  
+  pauseCountDownSession() {
+    this.setState({
+      sessionRunning: false,
+    });
+    this.state.myInterval.cancel()
+  }
+  resetCountDownSession() {
+    if (this.state.breakOrSession == 'session') {
+      this.setState({
+        sessionRunning: false,
+        timerTime: this.state.sessionButtonCount * 60
+      });
+      this.state.myInterval.cancel()      
+      }
+    if (this.state.breakOrSession == 'break') {
+      this.setState({
+        sessionRunning: false,
+        timerTime: this.state.breakButtonCount * 60
+      });
+      this.state.myInterval.cancel()      
+      }
+  }    
+  sessionTimeUp() {
+    if (this.state.sessionButtonCount < 60) {
+      this.setState({
+      sessionButtonCount: this.state.sessionButtonCount + 1,
+    });      
+    }
+  }
+  sessionTimeDown() {
+    if (this.state.sessionButtonCount > 1) {
+      this.setState({
+      sessionButtonCount: this.state.sessionButtonCount - 1,
+    });      
+    }
+  }
+  breakTimeUp() {
+    if (this.state.breakButtonCount < 60) {
+      this.setState({
+      breakButtonCount: this.state.breakButtonCount + 1,
+    });      
+    }
+  }
+  breakTimeDown() {
+    if (this.state.breakButtonCount > 1) {
+      this.setState({
+      breakButtonCount: this.state.breakButtonCount - 1,
+    });      
+    }
+  }
+  signalTimerDone() {
+   document.getElementById('timerdone').play();
+  }
+  render() {
+    return (
+      <div id='container'>
+        <h1>Pomodoro Clock</h1>
+        <br />
+        <div>
+          {this.state.breakOrSession == 'session' && <h1>Work Session</h1>}
+          {this.state.breakOrSession == 'break' && <h1>Break Session</h1>} 
+          <br />
+          <h2>{this.convertTimerToMinutes(this.state.timerTime)}:{this.convertTimerToSeconds(this.state.timerTime)}</h2>
+          <br />
+          <button id='startpausebutton' onClick={this.state.sessionRunning ? this.pauseCountDownSession :   this.startCountDownSession}><i class="fa fa-play"></i> / <i class="fa fa-pause"></i></button>
+          <button id='resetbutton' onClick={this.resetCountDownSession}><i class='fas fa-sync-alt'></i></button>
+        </div>
+        <div className='row'>
+          <div id='sessiondiv'>
+            <h1>Session Length</h1>
+            <button onClick={this.sessionTimeDown}><i class='fas fa-arrow-down'></i></button>
+            <h2>{this.state.sessionButtonCount}</h2>
+            <button onClick={this.sessionTimeUp}><i class='fas fa-arrow-up'></i></button>
+          </div>
+          <div id='breakdiv'>
+            <h1>Break Length</h1>
+            <button onClick={this.breakTimeDown}><i class='fas fa-arrow-down'></i></button>
+            <h2>{this.state.breakButtonCount}</h2>
+            <button onClick={this.breakTimeUp}><i class='fas fa-arrow-up'></i></button>
+          </div>
+        </div>
+        <audio id='timerdone' src='https://goo.gl/65cBl1'></audio>
+      </div>
+    );
+  }
+}
+ReactDOM.render(<PomodoroClock />, document.getElementById('app'))
