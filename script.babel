@@ -55,8 +55,7 @@ class ClockInterface extends React.Component {
   }    
   startCountDownSession() { 
     if (this.state.breakOrSession == 'session') {
-      this.setState({
-        timerTime: this.state.sessionButtonCount * 60,      
+      this.setState({      
         sessionRunning: true,
         myInterval:  accurateInterval(() => {
           this.timeLeft()
@@ -67,8 +66,7 @@ class ClockInterface extends React.Component {
       });      
      }
     if (this.state.breakOrSession == 'break') {
-      this.setState({
-        timerTime: this.state.breakButtonCount * 60,      
+      this.setState({     
         sessionRunning: true,
         myInterval:  accurateInterval(() => {
           this.timeLeft()
@@ -81,7 +79,8 @@ class ClockInterface extends React.Component {
    }
   toggleSession() {
       this.setState({
-        breakOrSession: 'break'
+        breakOrSession: 'break',
+        timerTime: this.state.breakButtonCount * 60
       })
       this.pauseCountDownSession()
       this.startCountDownSession()
@@ -89,7 +88,8 @@ class ClockInterface extends React.Component {
   }
   toggleBreak() {
       this.setState({
-        breakOrSession: 'session'
+        breakOrSession: 'session',
+        timerTime: this.state.sessionButtonCount * 60
       })
       this.pauseCountDownSession()
       this.signalTimerDone()
@@ -159,7 +159,7 @@ class ClockInterface extends React.Component {
           <br />
           <h2>{this.convertTimerToMinutes(this.state.timerTime)}:{this.convertTimerToSeconds(this.state.timerTime)}</h2>
           <br />
-          <button id='startpausebutton' onClick={this.state.sessionRunning ? this.pauseCountDownSession :   this.startCountDownSession}><i class="fa fa-play"></i> / <i class="fa fa-pause"></i></button>
+          <button id='startpausebutton' onClick={this.state.sessionRunning ? this.pauseCountDownSession : this.startCountDownSession}><i class="fa fa-play"></i> / <i class="fa fa-pause"></i></button>
           <button id='resetbutton' onClick={this.resetCountDownSession}><i class='fas fa-sync-alt'></i></button>
         </div>
         <div className='row'>
